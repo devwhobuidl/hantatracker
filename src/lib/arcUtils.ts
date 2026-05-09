@@ -53,7 +53,7 @@ export function generateOutbreakArcs(cases: any[]) {
   }
 
   return {
-    type: "FeatureCollection",
+    type: "FeatureCollection" as const,
     features
   };
 }
