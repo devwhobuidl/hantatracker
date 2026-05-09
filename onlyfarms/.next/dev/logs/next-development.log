@@ -1,7 +1,0 @@
-{"timestamp":"00:04:48.108","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/Users/risenomad/Work/Projects/Vibe code/kantana maps/onlyfarms/src/app'"}
-{"timestamp":"00:04:48.394","source":"Server","level":"ERROR","message":"⨯ \"unhandledRejection:\" Error: ENOENT: no such file or directory, scandir '/Users/risenomad/Work/Projects/Vibe code/kantana maps/onlyfarms/src/app'"}
-{"timestamp":"00:04:48.407","source":"Server","level":"ERROR","message":"⨯ \"unhandledRejection: \" Error: ENOENT: no such file or directory, scandir '/Users/risenomad/Work/Projects/Vibe code/kantana maps/onlyfarms/src/app'"}
-{"timestamp":"00:04:50.611","source":"Server","level":"ERROR","message":"⨯ PageNotFoundError: Cannot find module for page: route not found /_not-found/page"}
-{"timestamp":"00:04:53.806","source":"Server","level":"LOG","message":"○ Compiling /_error ..."}
-{"timestamp":"00:05:00.500","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, open '/Users/risenomad/Work/Projects/Vibe code/kantana maps/onlyfarms/.next/dev/static/development/_buildManifest.js.tmp.q39vnjbb44'"}
-{"timestamp":"00:05:00.508","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/Users/risenomad/Work/Projects/Vibe code/kantana maps/onlyfarms/src/app'"}
