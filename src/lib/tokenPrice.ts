@@ -1,5 +1,15 @@
 const TOKEN_CA = "2tXpgu2DLTsPUf9zFmuZmA4xrYxXKBTpVq9wAM7hzs9y"; // ← CHANGE THIS TO YOUR ACTUAL SOLANA TOKEN MINT
 
+interface DexPair {
+  chainId: string;
+  priceUsd?: string;
+  priceChange?: { h24?: number };
+  volume?: { h24?: number };
+  liquidity?: { usd?: number };
+  fdv?: number;
+  pairAddress: string;
+}
+
 export async function getTokenPrice() {
   try {
     const res = await fetch(
@@ -10,7 +20,7 @@ export async function getTokenPrice() {
     if (!res.ok) throw new Error('Failed');
 
     const data = await res.json();
-    const pair = data.pairs?.[0] || data.pairs?.find((p: any) => p.chainId === 'solana');
+    const pair = data.pairs?.[0] || data.pairs?.find((p: DexPair) => p.chainId === 'solana');
 
     if (pair) {
       return {

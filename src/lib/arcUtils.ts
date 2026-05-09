@@ -1,3 +1,5 @@
+import { Case } from "./data";
+
 export function createArc(start: [number, number], end: [number, number], points = 50) {
   const line: [number, number][] = [];
 
@@ -29,8 +31,18 @@ export function createArc(start: [number, number], end: [number, number], points
   return line;
 }
 
-export function generateOutbreakArcs(cases: any[]) {
-  const features: any[] = [];
+export function generateOutbreakArcs(cases: Case[]) {
+  const features: {
+    type: "Feature";
+    properties: {
+      id: string;
+      status: string;
+    };
+    geometry: {
+      type: "LineString";
+      coordinates: [number, number][];
+    };
+  }[] = [];
 
   // Connect some cases to represent "spread"
   // Connect Case 5 (Zurich) to others

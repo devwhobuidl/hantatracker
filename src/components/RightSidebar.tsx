@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { INITIAL_CHAT } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { MessageSquare, TrendingUp, Cpu } from "lucide-react";
+import Image from "next/image";
 
 interface RightSidebarProps {
   messages: typeof INITIAL_CHAT;
@@ -85,9 +86,11 @@ export default function RightSidebar({ messages, onSendMessage, onSelectLocation
           {messages.map((m) => (
             <div key={m.id} className="flex items-start space-x-3 group">
               <div className="shrink-0 mt-0.5">
-                <img 
+                <Image 
                   src={getAvatar(m.user)} 
                   alt={m.user} 
+                  width={24}
+                  height={24}
                   className="w-6 h-6 rounded border border-primary/20 bg-primary/10 group-hover:border-primary/50 transition-colors"
                 />
               </div>

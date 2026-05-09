@@ -3,8 +3,8 @@
 import { INITIAL_STATS } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { motion, useSpring, useTransform } from "framer-motion";
-import { useEffect, useState } from "react";
-import { Copy, Check, BarChart3, TrendingUp, RefreshCw } from "lucide-react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { Copy, Check, TrendingUp, RefreshCw } from "lucide-react";
 import { useTokenData } from "@/hooks/useTokenData";
 import { TOKEN_CONFIG, formatCurrency, formatPrice } from "@/lib/token-config";
 
@@ -26,11 +26,11 @@ function AnimatedCounter({ value, color }: { value: number; color: string }) {
 export default function Header({ stats, lastUpdated }: HeaderProps) {
   const token = useTokenData();
   const [copied, setCopied] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isHydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(TOKEN_CONFIG.TOKEN_CA);
@@ -47,8 +47,8 @@ export default function Header({ stats, lastUpdated }: HeaderProps) {
               HANTA GRAVITY LIVE
             </h1>
             <div className="flex items-center space-x-3 mt-1">
-              <span className="font-mono text-[9px] text-primary/40">EMERGENCY RESPONSE PROTOCOL v4.2</span>
-              {mounted && lastUpdated && (
+              <span className="font-mono text-[9px] text-primary/40 uppercase tracking-[0.2em] font-black">EMERGENCY RESPONSE PROTOCOL v4.2</span>
+              {isHydrated && lastUpdated && (
                 <span className="font-mono text-[8px] text-secondary/60 animate-pulse uppercase tracking-wider">
                   Last Updated: {lastUpdated.toLocaleTimeString()}
                 </span>
@@ -102,7 +102,7 @@ export default function Header({ stats, lastUpdated }: HeaderProps) {
               <div className="h-1 w-full bg-primary/10 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-primary animate-[shimmer_2s_infinite]" 
-                  style={{ width: `${60 + Math.random() * 20}%` }}
+                  style={{ width: "75%" }}
                 />
               </div>
             </div>

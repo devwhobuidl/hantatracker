@@ -1,0 +1,118 @@
+
+> hanta-live@0.1.0 lint
+> eslint
+
+
+/Users/risenomad/Work/Projects/Vibe code/kantana maps/src/components/BottomBar.tsx
+   4:17   warning  'AlertTriangle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  13:19   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/risenomad/Work/Projects/Vibe code/kantana maps/src/components/BottomBar.tsx:13:19
+  11 | export default function BottomBar({ feed, reports }: BottomBarProps) {
+  12 |   const [mounted, setMounted] = useState(false);
+> 13 |   useEffect(() => setMounted(true), []);
+     |                   ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  14 |
+  15 |   return (
+  16 |     <footer className="h-12 border-t border-primary/30 bg-background/80 backdrop-blur-md flex items-center divide-x divide-primary/20 z-50">  react-hooks/set-state-in-effect
+  40:132  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+
+/Users/risenomad/Work/Projects/Vibe code/kantana maps/src/components/CaseProfile.tsx
+  12:19  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/risenomad/Work/Projects/Vibe code/kantana maps/src/components/CaseProfile.tsx:12:19
+  10 | export default function CaseProfile({ selectedCase }: CaseProfileProps) {
+  11 |   const [mounted, setMounted] = useState(false);
+> 12 |   useEffect(() => setMounted(true), []);
+     |                   ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  13 |
+  14 |   if (!selectedCase) {
+  15 |     return (  react-hooks/set-state-in-effect
+
+/Users/risenomad/Work/Projects/Vibe code/kantana maps/src/components/Header.tsx
+    7:23  warning  'BarChart3' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+   32:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/risenomad/Work/Projects/Vibe code/kantana maps/src/components/Header.tsx:32:5
+  30 |
+  31 |   useEffect(() => {
+> 32 |     setMounted(true);
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  33 |   }, []);
+  34 |
+  35 |   const copyToClipboard = () => {  react-hooks/set-state-in-effect
+  105:43  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/Users/risenomad/Work/Projects/Vibe code/kantana maps/src/components/Header.tsx:105:43
+  103 |                 <div 
+  104 |                   className="h-full bg-primary animate-[shimmer_2s_infinite]" 
+> 105 |                   style={{ width: `${60 + Math.random() * 20}%` }}
+      |                                           ^^^^^^^^^^^^^ Cannot call impure function
+  106 |                 />
+  107 |               </div>
+  108 |             </div>                                                                                                                                                                                                           react-hooks/purity
+
+/Users/risenomad/Work/Projects/Vibe code/kantana maps/src/components/Map.tsx
+   34:45  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/Users/risenomad/Work/Projects/Vibe code/kantana maps/src/components/Map.tsx:34:45
+  32 |   const [focusedCaseId, setFocusedCaseId] = useState<string | null>(null);
+  33 |   const rotationRef = useRef<number>(0);
+> 34 |   const lastInteractionRef = useRef<number>(Date.now());
+     |                                             ^^^^^^^^^^ Cannot call impure function
+  35 |   const scanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  36 |
+  37 |   useEffect(() => {                                                                                                                                                                                                                                                                          react-hooks/purity
+  144:9   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/risenomad/Work/Projects/Vibe code/kantana maps/src/components/Map.tsx:144:9
+  142 |           bearing: Math.random() * 20 - 10,
+  143 |         });
+> 144 |         setPopupInfo(selected);
+      |         ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  145 |         lastInteractionRef.current = Date.now();
+  146 |       }
+  147 |     }  react-hooks/set-state-in-effect
+  153:46  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-explicit-any
+  229:49  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-explicit-any
+
+/Users/risenomad/Work/Projects/Vibe code/kantana maps/src/components/RightSidebar.tsx
+  88:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/risenomad/Work/Projects/Vibe code/kantana maps/src/lib/arcUtils.ts
+  32:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/risenomad/Work/Projects/Vibe code/kantana maps/src/lib/tokenPrice.ts
+  13:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 15 problems (12 errors, 3 warnings)
+

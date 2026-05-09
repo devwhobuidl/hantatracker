@@ -178,10 +178,10 @@ export const INITIAL_CHAT = [
 ];
 
 export const INITIAL_FEED = [
-  { id: 1, type: "ALERT", text: "NEW CASE CONFIRMED: ZURICH DISTRICT 5", timestamp: "1m ago" },
-  { id: 2, type: "INFO", text: "MV HONDIUS QUARANTINE EXTENDED TO 21 DAYS", timestamp: "5m ago" },
-  { id: 3, type: "WARNING", text: "HEATHROW AIRPORT IMPLEMENTING SCREENING FOR ALL SWISS ARRIVALS", timestamp: "12m ago" },
-  { id: 4, type: "CRITICAL", text: "CFR RATE ADJUSTED TO 8.4% NATIONWIDE", timestamp: "20m ago" },
+  { id: 1, type: "ALERT", text: "NEW CASE CONFIRMED: ZURICH DISTRICT 5", timestamp: "1m ago", url: "#" },
+  { id: 2, type: "INFO", text: "MV HONDIUS QUARANTINE EXTENDED TO 21 DAYS", timestamp: "5m ago", url: "#" },
+  { id: 3, type: "WARNING", text: "HEATHROW AIRPORT IMPLEMENTING SCREENING FOR ALL SWISS ARRIVALS", timestamp: "12m ago", url: "#" },
+  { id: 4, type: "CRITICAL", text: "CFR RATE ADJUSTED TO 8.4% NATIONWIDE", timestamp: "20m ago", url: "#" },
 ];
 
 export const INITIAL_STATS = {

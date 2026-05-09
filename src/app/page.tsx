@@ -23,17 +23,22 @@ export default function Dashboard() {
   const [stats, setStats] = useState(INITIAL_STATS);
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>("case-5");
   const [reports, setReports] = useState<ReliefWebReport[]>([]);
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [lastUpdated, setLastUpdated] = useState<Date | undefined>(undefined);
 
   const fetchReports = useCallback(async () => {
     const latestReports = await getLatestReports();
     setReports(latestReports);
-    setLastUpdated(new Date());
+    // Use setTimeout to avoid synchronous setState warning in Next.js 16
+    setTimeout(() => {
+      setLastUpdated(new Date());
+    }, 0);
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchReports();
+    setTimeout(() => {
+      setLastUpdated(new Date());
+      fetchReports();
+    }, 0);
     const interval = setInterval(fetchReports, 60000);
     return () => clearInterval(interval);
   }, [fetchReports]);
@@ -89,7 +94,8 @@ export default function Dashboard() {
           id: Date.now(),
           type: Math.random() > 0.6 ? "CRITICAL" : "WARNING",
           text: newAlert,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          url: "#"
         }, ...prev.slice(0, 15)]);
       }
     }, 6000); // Faster updates for "live" feel
@@ -128,7 +134,8 @@ export default function Dashboard() {
       id: Date.now(),
       type: "ALERT",
       text: `NEW CLUSTER DETECTED: ${loc.name}`,
-      timestamp: "Just now"
+      timestamp: "Just now",
+      url: "#"
     }, ...prev.slice(0, 9)]);
     
     setStats(prev => ({

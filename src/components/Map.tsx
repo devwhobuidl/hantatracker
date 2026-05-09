@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Map, { MapRef, NavigationControl, Marker, Popup, Source, Layer } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Case } from "@/lib/data";
@@ -17,7 +17,6 @@ const WORLD_GEOJSON = "https://raw.githubusercontent.com/datasets/geo-countries/
 
 export default function TacticalMap({ cases, selectedCaseId, onSelectCase }: TacticalMapProps) {
   const mapRef = useRef<MapRef>(null);
-  const [mounted, setMounted] = useState(false);
   const [viewport, setViewport] = useState({
     latitude: 0,
     longitude: 0,
@@ -27,16 +26,20 @@ export default function TacticalMap({ cases, selectedCaseId, onSelectCase }: Tac
   });
 
   const [popupInfo, setPopupInfo] = useState<Case | null>(null);
-  const [autoRotate, setAutoRotate] = useState(true); // Enabled by default
-  const [liveScan, setLiveScan] = useState(true); // Automated surveillance mode
+  const [autoRotate, setAutoRotate] = useState(true);
+  const [liveScan, setLiveScan] = useState(true);
   const [focusedCaseId, setFocusedCaseId] = useState<string | null>(null);
-  const rotationRef = useRef<number>(0);
-  const lastInteractionRef = useRef<number>(Date.now());
+  const lastInteractionRef = useRef<number>(0);
   const scanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const isHydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
+    lastInteractionRef.current = Date.now();
   }, []);
 
   // Auto-Rotation Logic
@@ -45,11 +48,10 @@ export default function TacticalMap({ cases, selectedCaseId, onSelectCase }: Tac
       const now = Date.now();
       const idleTime = now - lastInteractionRef.current;
 
-      // Only rotate if autoRotate is ON and we're NOT in the middle of a focused fly-to
-      if (autoRotate && idleTime > 10000 && !focusedCaseId) { 
+      if (autoRotate && idleTime > 8000 && !focusedCaseId) { 
         setViewport(prev => ({
           ...prev,
-          longitude: (prev.longitude + 0.05) % 360 
+          longitude: (prev.longitude + 0.2) % 360 
         }));
       }
     }, 50);
@@ -57,45 +59,54 @@ export default function TacticalMap({ cases, selectedCaseId, onSelectCase }: Tac
     return () => clearInterval(interval);
   }, [autoRotate, focusedCaseId]);
 
-  // Live Scan Mode Logic (Intelligent Surveillance)
+  // Live Scan Mode Logic
   useEffect(() => {
-    if (!liveScan) return;
+    if (!liveScan) {
+      if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
+      return;
+    }
 
     const runScan = () => {
+      if (!liveScan) return;
+
       const now = Date.now();
       const idleTime = now - lastInteractionRef.current;
 
-      // Pause if user interacted recently
       if (idleTime < 20000) {
         scanTimeoutRef.current = setTimeout(runScan, 5000);
         return;
       }
 
       if (mapRef.current && liveScan) {
-        // Weighted selection: Zurich, Berlin, London, Amsterdam are higher priority
-        const weightedPool = cases.flatMap(c => {
+        const validCases = cases.filter(c => c.lat !== undefined && c.lng !== undefined);
+        if (validCases.length === 0) return;
+
+        const weightedPool = validCases.flatMap(c => {
           const isHighPriority = c.location.includes("ZURICH") || 
                                  c.location.includes("BERLIN") || 
                                  c.location.includes("LONDON") || 
                                  c.location.includes("AMSTERDAM");
-          return Array(isHighPriority ? 5 : 1).fill(c);
+          return Array(isHighPriority ? 6 : 1).fill(c);
         });
 
         const target = weightedPool[Math.floor(Math.random() * weightedPool.length)];
         
-        // Focus on location
         setFocusedCaseId(target.id);
+        onSelectCase(target.id);
+
         mapRef.current.flyTo({
           center: [target.lng, target.lat],
           zoom: 6,
-          pitch: 45,
-          bearing: Math.random() * 30 - 15,
-          duration: 4000,
+          pitch: 50,
+          bearing: Math.random() * 40 - 20,
+          duration: 4500,
           essential: true
         });
 
-        // Hold for 8s then release
+        const dwellTime = Math.random() * (10000 - 6000) + 6000;
         scanTimeoutRef.current = setTimeout(() => {
+          if (!liveScan) return;
+          
           setFocusedCaseId(null);
           if (mapRef.current) {
             mapRef.current.easeTo({
@@ -104,24 +115,22 @@ export default function TacticalMap({ cases, selectedCaseId, onSelectCase }: Tac
               duration: 4000
             });
           }
-          // Schedule next scan in 18-35 seconds
           const nextInterval = Math.random() * (35000 - 18000) + 18000;
           scanTimeoutRef.current = setTimeout(runScan, nextInterval);
-        }, 8000);
+        }, dwellTime);
       }
     };
 
-    // Initial delay
-    const initialDelay = Math.random() * 10000 + 5000;
+    const initialDelay = Math.random() * 5000 + 5000;
     scanTimeoutRef.current = setTimeout(runScan, initialDelay);
 
     return () => {
       if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
     };
-  }, [liveScan, cases]);
+  }, [liveScan, cases, onSelectCase]);
 
   useEffect(() => {
-    if (selectedCaseId && mapRef.current) {
+    if (selectedCaseId && mapRef.current && !focusedCaseId) {
       const selected = cases.find((c) => c.id === selectedCaseId);
       if (selected) {
         mapRef.current.flyTo({
@@ -132,25 +141,26 @@ export default function TacticalMap({ cases, selectedCaseId, onSelectCase }: Tac
           pitch: 45,
           bearing: Math.random() * 20 - 10,
         });
-        setPopupInfo(selected);
-        lastInteractionRef.current = Date.now(); // Mark interaction
+        setTimeout(() => {
+          setPopupInfo(selected);
+        }, 0);
+        lastInteractionRef.current = Date.now();
       }
     }
-  }, [selectedCaseId, cases]);
+  }, [selectedCaseId, cases, focusedCaseId]);
 
-  // Set atmosphere/fog for the globe
   useEffect(() => {
-    if (mapRef.current) {
-      const map = mapRef.current.getMap() as any;
+    if (isHydrated && mapRef.current) {
+      const map = mapRef.current.getMap();
       const updateFog = () => {
-        if (typeof map.setFog === 'function') {
-          map.setFog({
-          color: 'rgb(0, 10, 5)', // Deep space with a hint of green
-          'high-color': 'rgba(0, 255, 159, 0.7)', // Stronger neon horizon
+        if (typeof (map as any).setFog === 'function') {
+          (map as any).setFog({
+          color: 'rgb(0, 10, 5)',
+          'high-color': 'rgba(0, 255, 159, 0.7)',
           'horizon-blend': 0.1,
-          'space-color': 'rgb(5, 0, 5)', // Subtle magenta hint in space
+          'space-color': 'rgb(5, 0, 5)',
           'star-intensity': 0.8,
-          'star-color': 'rgba(255, 0, 170, 0.5)' // Pink stars for contrast
+          'star-color': 'rgba(255, 0, 170, 0.5)'
           });
         }
       };
@@ -158,50 +168,51 @@ export default function TacticalMap({ cases, selectedCaseId, onSelectCase }: Tac
       if (map.isStyleLoaded()) updateFog();
       else map.on('style.load', updateFog);
     }
-  }, [mounted]);
+  }, [isHydrated]);
 
-
-  const handleZoom = (delta: number) => {
-    if (mapRef.current) {
-      const currentZoom = mapRef.current.getZoom();
-      mapRef.current.zoomTo(currentZoom + delta, { duration: 500 });
-      lastInteractionRef.current = Date.now();
-    }
-  };
-
-  const handleRotate = (delta: number) => {
-    if (mapRef.current) {
-      const currentBearing = mapRef.current.getBearing();
-      mapRef.current.rotateTo(currentBearing + delta, { duration: 500 });
-      lastInteractionRef.current = Date.now();
-    }
-  };
+  if (!isHydrated) return null;
 
   const handleEuropeFocus = () => {
     if (mapRef.current) {
       mapRef.current.flyTo({
-        center: [15, 50],
+        center: [10, 50],
         zoom: 3.5,
-        pitch: 30,
-        duration: 3000
+        duration: 3000,
+        pitch: 30
       });
-      lastInteractionRef.current = Date.now();
     }
   };
 
   const handleWorldView = () => {
     if (mapRef.current) {
       mapRef.current.flyTo({
-        center: [0, 0],
+        center: [0, 20],
         zoom: 1.5,
-        pitch: 0,
-        duration: 3000
+        duration: 3000,
+        pitch: 0
       });
-      lastInteractionRef.current = Date.now();
     }
   };
 
-  if (!mounted) return null;
+  const handleZoom = (delta: number) => {
+    if (mapRef.current) {
+      const zoom = mapRef.current.getZoom();
+      mapRef.current.easeTo({
+        zoom: zoom + delta,
+        duration: 500
+      });
+    }
+  };
+
+  const handleRotate = (delta: number) => {
+    if (mapRef.current) {
+      const bearing = mapRef.current.getBearing();
+      mapRef.current.easeTo({
+        bearing: bearing + delta,
+        duration: 500
+      });
+    }
+  };
 
   return (
     <div className="w-full h-full relative bg-black overflow-hidden" id="tactical-map-container">
@@ -216,8 +227,6 @@ export default function TacticalMap({ cases, selectedCaseId, onSelectCase }: Tac
         onMoveStart={() => lastInteractionRef.current = Date.now()}
         mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
         style={{ width: "100%", height: "100%" }}
-        projection="globe"
-        {...({ preserveDrawingBuffer: true } as any)}
         dragRotate={true}
         touchPitch={true}
         touchZoomRotate={true}
@@ -517,8 +526,9 @@ export default function TacticalMap({ cases, selectedCaseId, onSelectCase }: Tac
             )}
             title="Auto Rotate"
           >
-            <div className="text-[8px] font-black leading-none mb-0.5">ROT</div>
-            <div className={`w-1.5 h-1.5 rounded-full ${autoRotate ? 'bg-primary shadow-[0_0_5px_#00ff9f]' : 'bg-white/20'}`} />
+            <div className="text-[7px] font-black leading-none mb-0.5 uppercase tracking-tighter">Auto</div>
+            <div className="text-[7px] font-black leading-none mb-0.5 uppercase tracking-tighter">Rot</div>
+            <div className={`w-1.5 h-1.5 rounded-full mt-0.5 ${autoRotate ? 'bg-primary shadow-[0_0_5px_#00ff9f]' : 'bg-white/20'}`} />
           </button>
 
           <button 
@@ -529,8 +539,9 @@ export default function TacticalMap({ cases, selectedCaseId, onSelectCase }: Tac
             )}
             title="Live Scan Mode"
           >
-            <div className="text-[8px] font-black leading-none mb-0.5">SCAN</div>
-            <div className={`w-1.5 h-1.5 rounded-full ${liveScan ? 'bg-secondary shadow-[0_0_5px_#ff00aa]' : 'bg-white/20'}`} />
+            <div className="text-[7px] font-black leading-none mb-0.5 uppercase tracking-tighter">Live</div>
+            <div className="text-[7px] font-black leading-none mb-0.5 uppercase tracking-tighter">Scan</div>
+            <div className={`w-1.5 h-1.5 rounded-full mt-0.5 ${liveScan ? 'bg-secondary shadow-[0_0_5px_#ff00aa]' : 'bg-white/20'}`} />
           </button>
         </div>
 
@@ -543,7 +554,6 @@ export default function TacticalMap({ cases, selectedCaseId, onSelectCase }: Tac
               bearing: 0,
               duration: 2000
             });
-            rotationRef.current = 0;
             lastInteractionRef.current = Date.now();
           }}
           className="bg-black/60 backdrop-blur-md border border-primary/30 p-2 rounded text-[8px] text-primary hover:bg-primary/20 transition-all font-mono uppercase tracking-tighter font-black"

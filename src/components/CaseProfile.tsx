@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 import { Case } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { User, MapPin, Anchor, Link as LinkIcon, Info } from "lucide-react";
@@ -8,8 +8,11 @@ interface CaseProfileProps {
 }
 
 export default function CaseProfile({ selectedCase }: CaseProfileProps) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   if (!selectedCase) {
     return (
